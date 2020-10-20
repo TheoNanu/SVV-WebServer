@@ -1,3 +1,5 @@
+package test;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -9,28 +11,26 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.Socket;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ServerTest {
+import server.ResourceProvider;
+
+public class ResourceProviderTest {
 	
-	HTTPServer server;
-	Socket s;
+	private ResourceProvider prov = null;
 	
 	@Before
 	public void setup() {
-		s = new Socket();
-		server = new HTTPServer(s);
+		this.prov = new ResourceProvider();
 	}
 
 	@Test(expected = FileNotFoundException.class)
-	public void testInexistentFile() throws FileNotFoundException{
+	public void testReadFileDataInexistentFile() throws FileNotFoundException{
 		File file = new File(" ");
 		int fileLength = (int)file.length();
-		server.readFileData(file, fileLength);
+		prov.readFileData(file, fileLength);
 	}
 	
 	@Test
@@ -39,7 +39,7 @@ public class ServerTest {
 		int fileLength = (int)file.length();
 		byte expected[] = "This is a test file.".getBytes();
 		try {
-			byte[] read = server.readFileData(file, fileLength);
+			byte[] read = prov.readFileData(file, fileLength);
 			assertArrayEquals(expected, read);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -48,30 +48,30 @@ public class ServerTest {
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void testNullFileReference() {
+	public void testReadFileDataNullFileReference() {
 		File file = null;
 		int fileLength = (int)file.length();
 		try {
-			byte read[] = server.readFileData(file, fileLength);
+			byte read[] = prov.readFileData(file, fileLength);
 		}catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void testPrintWriterNullReference() {
+	public void testReadFileDataPrintWriterNullReference() {
 		PrintWriter out = null;
 		OutputStream dataOut = null;
 		OutputStream otp = new ByteArrayOutputStream();
 		dataOut = new BufferedOutputStream(otp);
-		server.fileNotFound(out, dataOut, "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt");
+		prov.fileNotFound(out, dataOut);
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void  testOutputStreamNullReference() {
+	public void  testReadFileDataOutputStreamNullReference() {
 		OutputStream otp = new ByteArrayOutputStream();
 		PrintWriter out = new PrintWriter(otp);
-		server.fileNotFound(out, null, "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt");
+		prov.fileNotFound(out, null);
 	}
 	
 	@Test
@@ -106,7 +106,7 @@ public class ServerTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		server.sendDefaultPage(out, dataOut);
+		prov.sendDefaultPage(out, dataOut);
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
 	}
@@ -144,7 +144,7 @@ public class ServerTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		server.sendRequestedFile(out, dataOut, "test.txt");
+		prov.sendRequestedFile(out, dataOut, "test.txt");
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
 	}
@@ -182,27 +182,9 @@ public class ServerTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		server.fileNotFound(out, dataOut, "404.html");
+		prov.fileNotFound(out, dataOut);
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
-	}
-	
-	@Test
-	public void testDirectoryChange() {
-		String newRootDir = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\";
-		server.changeRootDirectory(newRootDir);
-		assertTrue(newRootDir.equals(server.getCurrentRootDirectory()));
-	}
-	
-	@After
-	public void tearDown() {
-		server = null;
-		try {
-			s.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 }

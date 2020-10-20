@@ -1,3 +1,4 @@
+package server;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,6 +63,7 @@ public class HTTPServer implements Runnable{
 			dataOut = new BufferedOutputStream(socket.getOutputStream());
 			
 			String input = in.readLine();
+			System.out.println(input);
 			String method = "";
 			
 			if(input != null)
