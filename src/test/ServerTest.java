@@ -17,7 +17,7 @@ public class ServerTest {
 	@Before
 	public void setup() {
 		s = new Socket();
-		server = new HTTPServer(s);
+		//server = new HTTPServer(s);
 	}
 
 

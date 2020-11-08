@@ -15,15 +15,24 @@ import java.io.PrintWriter;
 import org.junit.Before;
 import org.junit.Test;
 
+import config.Config;
+import exceptions.InvalidPathException;
 import server.ResourceProvider;
 
 public class ResourceProviderTest {
 	
 	private ResourceProvider prov = null;
+	private Config config = null;
 	
 	@Before
 	public void setup() {
 		this.prov = new ResourceProvider();
+		try {
+			this.config = new Config("C:\\Users\\theod\\config.properties");
+		} catch (InvalidPathException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Test(expected = FileNotFoundException.class)
@@ -60,18 +69,20 @@ public class ResourceProviderTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void testReadFileDataPrintWriterNullReference() {
+		String fileNotFound = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
 		PrintWriter out = null;
 		OutputStream dataOut = null;
 		OutputStream otp = new ByteArrayOutputStream();
 		dataOut = new BufferedOutputStream(otp);
-		prov.fileNotFound(out, dataOut);
+		prov.fileNotFound(out, dataOut, fileNotFound);
 	}
 	
 	@Test(expected=NullPointerException.class)
 	public void  testReadFileDataOutputStreamNullReference() {
+		String fileNotFound = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
 		OutputStream otp = new ByteArrayOutputStream();
 		PrintWriter out = new PrintWriter(otp);
-		prov.fileNotFound(out, null);
+		prov.fileNotFound(out, null, fileNotFound);
 	}
 	
 	@Test
@@ -114,6 +125,7 @@ public class ResourceProviderTest {
 	@Test
 	public void testContentOfRequestedFile() {
 		String reqFile = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt";
+		String fileNotFound = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
 		File file = new File(reqFile);
 		int fileLength = (int)file.length();
 		byte[] fileContent = new byte[fileLength];
@@ -144,7 +156,7 @@ public class ResourceProviderTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		prov.sendRequestedFile(out, dataOut, "test.txt");
+		prov.sendRequestedFile(out, dataOut, "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt", fileNotFound);
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
 	}
@@ -182,7 +194,7 @@ public class ResourceProviderTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		prov.fileNotFound(out, dataOut);
+		prov.fileNotFound(out, dataOut, reqFile);
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
 	}

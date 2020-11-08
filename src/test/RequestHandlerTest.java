@@ -7,50 +7,34 @@ import org.junit.Test;
 
 import exceptions.InvalidRequestException;
 import server.RequestHandler;
-import server.ResourceProvider;
 
 public class RequestHandlerTest {
 	
 	private RequestHandler reqHandler = null;
-	private ResourceProvider prov = null;
 	
 	@Before
 	public void setup() {
-		this.prov = new ResourceProvider();
-		this.reqHandler = new RequestHandler(this.prov);
+		this.reqHandler = new RequestHandler();
 	}
 
 	@Test(expected = InvalidRequestException.class)
-	public void testHandleRequestPostRequest() {
+	public void testHandleRequestPostRequest() throws InvalidRequestException {
 		String request = "POST / HTTP/1.1";
-		try {
-			reqHandler.handleRequest(request);
-		} catch (InvalidRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		reqHandler.handleRequest(request);
+
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void testHandleRequestUpdateRequest() {
+	public void testHandleRequestUpdateRequest() throws InvalidRequestException {
 		String request = "UPDATE / HTTP/1.1";
-		try {
-			reqHandler.handleRequest(request);
-		} catch (InvalidRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		reqHandler.handleRequest(request);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void testHandleRequestDeleteRequest() {
+	public void testHandleRequestDeleteRequest() throws InvalidRequestException {
 		String request = "DELETE / HTTP/1.1";
-		try {
-			reqHandler.handleRequest(request);
-		} catch (InvalidRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		reqHandler.handleRequest(request);
+
 	}
 	
 	@Test

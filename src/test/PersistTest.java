@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import config.Config;
 import exceptions.InvalidDirectoryException;
 import exceptions.InvalidPathException;
 import exceptions.InvalidPortException;
@@ -13,85 +14,58 @@ import persist.Persist;
 public class PersistTest {
 	
 	private Persist persist = null;
+	private Config config;
 	
 	@Before
 	public void setup() {
-		this.persist = new Persist();
+		try {
+			this.config = new Config("C:\\Users\\theod\\config.properties");
+		} catch (InvalidPathException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.persist = new Persist(config);
 	}
 
 	@Test(expected = InvalidPortException.class)
-	public void testSetPortNumberInvalidPortExceedLowBound() {
-		try {
-			persist.setPortNumber(-1);
-		} catch (InvalidPortException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetPortNumberInvalidPortExceedLowBound() throws InvalidPortException {
+		persist.setPortNumber(-1);
+
 	}
 	
 	@Test(expected = InvalidPortException.class)
-	public void testSetPortNumberInvalidPortExceedUpBound() {
-		try {
-			persist.setPortNumber(66000);
-		} catch (InvalidPortException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetPortNumberInvalidPortExceedUpBound() throws InvalidPortException {
+		persist.setPortNumber(66000);
 	}
 	
 	@Test(expected = InvalidPortException.class)
-	public void testSetPortNumberInvalidPortReservedPort() {
-		try {
-			persist.setPortNumber(80);
-		} catch (InvalidPortException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetPortNumberInvalidPortReservedPort() throws InvalidPortException {
+		persist.setPortNumber(47);
 	}
 	
 	@Test
-	public void testSetPortNumberValidPort() {
+	public void testSetPortNumberValidPort() throws InvalidPortException{
 		int portNumber = 8081;
-		try {
-			persist.setPortNumber(portNumber);
-		} catch (InvalidPortException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		persist.setPortNumber(portNumber);
 		assertEquals(persist.getPortNumber(), portNumber);
 	}
 	
 	@Test(expected = InvalidPathException.class)
-	public void testSetRootDirInvalidPath() {
-		String rootDirPath = "";
-		try {
-			persist.setRootDir(rootDirPath);
-		} catch (InvalidDirectoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidPathException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetRootDirInvalidPath() throws InvalidDirectoryException, InvalidPathException {
+		String rootDirPath = "C:\\Users\\theod*";
+		persist.setRootDir(rootDirPath);
 	}
 	
 	@Test(expected = InvalidDirectoryException.class)
-	public void testSetRootDirInvalidDirectoryException() {
-		String rootDirPath = "";
-		try {
-			persist.setRootDir(rootDirPath);
-		} catch (InvalidDirectoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidPathException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetRootDirInvalidDirectoryException() throws InvalidDirectoryException, InvalidPathException {
+		String rootDirPath = "C:\\Users\\theod\\Documents";
+		persist.setRootDir(rootDirPath);
+	
 	}
 	
 	@Test
 	public void testSetRootDirValidPathAndDir() {
-		String rootDirPath = "";
+		String rootDirPath = "C:\\Users\\theod";
 		try {
 			persist.setRootDir(rootDirPath);
 		} catch (InvalidDirectoryException e) {
@@ -101,42 +75,27 @@ public class PersistTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertEquals(persist.getRootDir(), rootDirPath);
+		assertEquals(rootDirPath, persist.getRootDir());
 	}
 	
 	@Test(expected = InvalidPathException.class)
-	public void testSetMaintenanceDirInvalidPath() {
-		String maintenanceDirPath = "";
-		try {
-			persist.setMaintenanceDir(maintenanceDirPath);
-		} catch (InvalidDirectoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidPathException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetMaintenanceDirInvalidPath() throws InvalidDirectoryException, InvalidPathException {
+		String maintenanceDirPath = "C:\\Users\\theod*";
+		persist.setMaintenanceDir(maintenanceDirPath);
 	}
 	
 	@Test(expected = InvalidDirectoryException.class)
-	public void testSetMaintenanceDirInvalidDirectoryException() {
-		String maintenanceDirPath = "";
-		try {
-			persist.setMaintenanceDir(maintenanceDirPath);
-		} catch (InvalidDirectoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidPathException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSetMaintenanceDirInvalidDirectoryException() throws InvalidDirectoryException, InvalidPathException {
+		String maintenanceDirPath = "C:\\Users\\theod\\Documents";
+		persist.setMaintenanceDir(maintenanceDirPath);
+
 	}
 	
 	@Test
 	public void testSetMaintenanceDirValidPathAndDir() {
-		String maintenanceDirPath = "";
+		String maintenanceDirPath = "C:\\Users\\theod";
 		try {
-			persist.setRootDir(maintenanceDirPath);
+			persist.setMaintenanceDir(maintenanceDirPath);
 		} catch (InvalidDirectoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

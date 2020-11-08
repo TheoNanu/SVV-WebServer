@@ -2,40 +2,72 @@ package server;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
+import config.Config;
+import exceptions.InvalidDirectoryException;
+import exceptions.InvalidPathException;
+import exceptions.InvalidPortException;
+import exceptions.InvalidRequestException;
+import persist.Persist;
+
 public class HTTPServer implements Runnable{
 	
-	private String webRoot = null;
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_NOT_FOUND = "404.html";
 	static final String METHOD_NOT_SUPPORTED = "not_supported.html";
-	
-	static final int PORT = 8080;
+	private ResourceProvider prov = null;
+	private Config config = null;
+	private Persist persist = null;
+	private RequestHandler req = null;
 	
 	private Socket socket;
 	
-	public HTTPServer(Socket s) {
+	public HTTPServer(Socket s, Config c, Persist p) {
 		this.socket = s;
-		webRoot = System.getProperty("user.dir");
+		this.prov = new ResourceProvider();
+		this.config = c;
+		this.req = new RequestHandler();
+		this.persist = p;
 	}
 	
 	public static void main(String[] args) {
 		
 		try {
-			ServerSocket server = new ServerSocket(PORT);
-			System.out.println("Server started. Listening for connections.");
+			Config config = null;
+			try {
+				config = new Config("C:\\Users\\theod\\config.properties");
+			} catch (InvalidPathException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Persist p = new Persist(config);
+			try {
+				p.setPortNumber(8081);
+			} catch (InvalidPortException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				p.setRootDir("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src");
+			} catch (InvalidDirectoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidPathException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			int port = p.getPortNumber();
+			ServerSocket server = new ServerSocket(port);
+			System.out.println("Server started. Listening for connections on  port " + port);
 			
 			while(true) {
-				HTTPServer myServer = new HTTPServer(server.accept());
+				HTTPServer myServer = new HTTPServer(server.accept(), config, p);
 				System.out.println("Connection received.");
 				
 				Thread thread = new Thread(myServer);
@@ -73,12 +105,23 @@ public class HTTPServer implements Runnable{
 				fileRequested = parse.nextToken().toLowerCase();
 			}
 			
-			if(!method.equals("GET"))
-			{
-				File file = new File(webRoot + METHOD_NOT_SUPPORTED);
+			try {
+				this.req.handleRequest(input);
+				if(fileRequested.endsWith("/"))
+				{
+					fileRequested += DEFAULT_FILE;
+				}
+				
+				String absolutePath = this.config.getSetting("rootDirectory") + "\\" +  fileRequested;
+				String pathFileNotFound = this.config.getSetting("rootDirectory") + "\\" +  FILE_NOT_FOUND;
+				
+				this.prov.sendRequestedFile(out, dataOut, absolutePath, pathFileNotFound);
+			} catch (InvalidRequestException e) {
+				// TODO Auto-generated catch block
+				File file = new File(this.config.getSetting("rootDirectory") + "\\" +  METHOD_NOT_SUPPORTED);
 				int fileLength = (int)file.length();
 				String contentType = "text/html";
-				byte[] fileData = readFileData(file, fileLength);
+				byte[] fileData = this.prov.readFileData(file, fileLength);
 				
 				out.println("HTTP/1.1 501 Not Implemented");
 				out.println("Content-type: " + contentType);
@@ -89,15 +132,7 @@ public class HTTPServer implements Runnable{
 				dataOut.write(fileData, 0, fileLength);
 				dataOut.flush();
 			}
-			else
-			{
-				if(fileRequested.endsWith("/"))
-				{
-					fileRequested += DEFAULT_FILE;
-				}
-				
-				sendRequestedFile(out, dataOut, fileRequested);	
-			}
+			
 		}
 		catch(IOException ioe) {
 			System.err.println("I\\O Exception");
@@ -116,116 +151,5 @@ public class HTTPServer implements Runnable{
 		}
 		
 	}
-	
-	public byte[] readFileData(File file, int fileLength) throws FileNotFoundException
-	{
-		FileInputStream fileIn = null;
-		byte[] fileData = new byte[fileLength];
-		
-		try {
-			fileIn = new FileInputStream(file);
-			try {
-				fileIn.read(fileData);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		finally {
-			if(fileIn != null)
-				try {
-					fileIn.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		
-		return fileData;
-	}
-	
-	public void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) {
-		File file = new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\" + FILE_NOT_FOUND);
-		int fileLength = (int)file.length();
-		String content = "text/html";
-		byte[] fileData = null;
-		try {
-			fileData = readFileData(file, fileLength);
-		}catch(FileNotFoundException fnfe) {
-			fileNotFound(out, dataOut, fileRequested);
-		}
-		
-		out.println("HTTP/1.1 404 File Not Found");
-		out.println("Content-type: " + content);
-		out.println("Content-length: " + fileLength);
-		out.println();
-		out.flush();
-		
-		try {
-			dataOut.write(fileData, 0, fileLength);
-			dataOut.flush();
-		} catch (IOException e1) {
-			System.err.println("File not found!!!");
-		}
-	}
-	
-	public void sendDefaultPage(PrintWriter out, OutputStream dataOut) {
-		File file = new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\" + DEFAULT_FILE);
-		int fileLength = (int)file.length();
-		String content = "text/html";
-		byte[] fileData = null;
-		try {
-			fileData = readFileData(file, fileLength);
-		}catch(FileNotFoundException fnfe) {
-			fnfe.printStackTrace();
-		}
-		
-		out.println("HTTP/1.1 200 OK");
-		out.println("Content-type: " + content);
-		out.println("Content-length: " + fileLength);
-		out.println();
-		out.flush();
-		
-		try {
-			dataOut.write(fileData, 0, fileLength);
-			dataOut.flush();
-		} catch (IOException e1) {
-			System.err.println("File not found!!!");
-		}
-	}
-	
-	public void sendRequestedFile(PrintWriter out, OutputStream dataOut, String fileRequested) {
-		File file = new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\" + fileRequested);
-		int fileLength = (int)file.length();
-		String content = "text/html";
-		byte[] fileData = null;
-		try {
-			fileData = readFileData(file, fileLength);
-		}catch(FileNotFoundException fnfe) {
-			fileNotFound(out, dataOut, fileRequested);
-			return;
-		}
-		
-		out.println("HTTP/1.1 200 OK");
-		out.println("Content-type: " + content);
-		out.println("Content-length: " + fileLength);
-		out.println();
-		out.flush();
-		
-		try {
-			dataOut.write(fileData, 0, fileLength);
-			dataOut.flush();
-		} catch (IOException e1) {
-			System.err.println("File not found!!!");
-		}
-	}
-	
-	public void changeRootDirectory(String newRootDir) {
-		this.webRoot = newRootDir;
-	}
-	
-	public String getCurrentRootDirectory() {
-		return this.webRoot;
-	}
-
 }
+
