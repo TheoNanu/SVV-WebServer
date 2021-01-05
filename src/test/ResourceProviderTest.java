@@ -69,7 +69,7 @@ public class ResourceProviderTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void testReadFileDataPrintWriterNullReference() {
-		String fileNotFound = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
+		String fileNotFound = config.getSetting("rootDirectory") + "\\404.html";
 		PrintWriter out = null;
 		OutputStream dataOut = null;
 		OutputStream otp = new ByteArrayOutputStream();
@@ -79,7 +79,7 @@ public class ResourceProviderTest {
 	
 	@Test(expected=NullPointerException.class)
 	public void  testReadFileDataOutputStreamNullReference() {
-		String fileNotFound = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
+		String fileNotFound = config.getSetting("rootDirectory") + "\\404.html";
 		OutputStream otp = new ByteArrayOutputStream();
 		PrintWriter out = new PrintWriter(otp);
 		prov.fileNotFound(out, null, fileNotFound);
@@ -87,7 +87,7 @@ public class ResourceProviderTest {
 	
 	@Test
 	public void testContentOfDefaultFile() {
-		File file = new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\index.html");
+		File file = new File(config.getSetting("rootDirectory") + "\\index.html");
 		int fileLength = (int)file.length();
 		byte[] fileContent = new byte[fileLength];
 		FileInputStream fileInput = null;
@@ -117,7 +117,7 @@ public class ResourceProviderTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		prov.sendDefaultPage(out, dataOut);
+		prov.sendDefaultPage(out, dataOut, config.getSetting("rootDirectory")+ "\\index.html");
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
 	}
@@ -125,7 +125,7 @@ public class ResourceProviderTest {
 	@Test
 	public void testContentOfRequestedFile() {
 		String reqFile = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt";
-		String fileNotFound = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
+		String fileNotFound = config.getSetting("rootDirectory") + "\\404.html";
 		File file = new File(reqFile);
 		int fileLength = (int)file.length();
 		byte[] fileContent = new byte[fileLength];
@@ -163,7 +163,7 @@ public class ResourceProviderTest {
 	
 	@Test
 	public void testContentOfErrorFile() {
-		String reqFile = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\404.html";
+		String reqFile = config.getSetting("rootDirectory") + "\\404.html";
 		File file = new File(reqFile);
 		int fileLength = (int)file.length();
 		byte[] fileContent = new byte[fileLength];

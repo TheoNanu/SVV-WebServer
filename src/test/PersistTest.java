@@ -65,7 +65,7 @@ public class PersistTest {
 	
 	@Test
 	public void testSetRootDirValidPathAndDir() {
-		String rootDirPath = "C:\\Users\\theod";
+		String rootDirPath = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\root";
 		try {
 			persist.setRootDir(rootDirPath);
 		} catch (InvalidDirectoryException e) {
@@ -93,7 +93,7 @@ public class PersistTest {
 	
 	@Test
 	public void testSetMaintenanceDirValidPathAndDir() {
-		String maintenanceDirPath = "C:\\Users\\theod";
+		String maintenanceDirPath = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\maintenance";
 		try {
 			persist.setMaintenanceDir(maintenanceDirPath);
 		} catch (InvalidDirectoryException e) {

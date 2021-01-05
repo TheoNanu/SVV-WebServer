@@ -1,0 +1,33 @@
+- !!net.sourceforge.marathon.objectmap.OMapContainer
+    containerGeneralProperties:
+    - {name: component.class.simpleName, value: JFrame}
+    - {name: title, value: SVV WEB SERVER}
+    - {name: enabled, value: 'true'}
+    - {name: instanceOf, value: javax.swing.JFrame}
+    - {name: component.class.name, value: javax.swing.JFrame}
+    - {name: accessibleContext.accessibleName, value: SVV WEB SERVER}
+    - {name: size, value: '[width=700,height=300]'}
+    - {name: name, value: frame0}
+    - {name: position, value: '[x=768,y=412]'}
+    containerRecognitionProperties:
+    - {method: equals, name: component.class.name, value: javax.swing.JFrame}
+    - {method: equals, name: title, value: SVV WEB SERVER}
+    containerTitles: [SVV WEB SERVER]
+    fileName: SVV WEB SERVER_256016238191953818.yaml
+- !!net.sourceforge.marathon.objectmap.OMapContainer
+    containerGeneralProperties:
+    - {name: component.class.simpleName, value: JDialog}
+    - {name: title, value: Open}
+    - {name: enabled, value: 'true'}
+    - {name: instanceOf, value: javax.swing.JDialog}
+    - {name: oMapClassName, value: javax.swing.JFileChooser#Dialog}
+    - {name: component.class.name, value: javax.swing.JDialog}
+    - {name: oMapClassSimpleName, value: JFileChooser#Dialog}
+    - {name: accessibleContext.accessibleName, value: Open}
+    - {name: size, value: '[width=514,height=363]'}
+    - {name: name, value: dialog0}
+    - {name: position, value: '[x=861,y=381]'}
+    containerRecognitionProperties:
+    - {method: equals, name: oMapClassName, value: javax.swing.JFileChooser#Dialog}
+    containerTitles: [Open]
+    fileName: Open_8234859100529470581.yaml

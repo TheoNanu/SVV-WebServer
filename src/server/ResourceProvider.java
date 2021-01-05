@@ -60,8 +60,8 @@ public class ResourceProvider {
 		}
 	}
 	
-	public void sendDefaultPage(PrintWriter out, OutputStream dataOut) {
-		File file = new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\index.html");
+	public void sendDefaultPage(PrintWriter out, OutputStream dataOut, String defaultPath) {
+		File file = new File(defaultPath);
 		int fileLength = (int)file.length();
 		String content = "text/html";
 		byte[] fileData = null;
@@ -88,7 +88,11 @@ public class ResourceProvider {
 	public void sendRequestedFile(PrintWriter out, OutputStream dataOut, String absolutePath, String pathFileNotFound) {
 		File file = new File(absolutePath);
 		int fileLength = (int)file.length();
-		String content = "text/html";
+		String content = "";
+		if(absolutePath.endsWith("css"))
+			content = "text/css";
+		else
+			content = "text/html";
 		byte[] fileData = null;
 		try {
 			fileData = readFileData(file, fileLength);

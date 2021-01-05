@@ -22,52 +22,43 @@ public class HTTPServer implements Runnable{
 	static final String FILE_NOT_FOUND = "404.html";
 	static final String METHOD_NOT_SUPPORTED = "not_supported.html";
 	private ResourceProvider prov = null;
-	private Config config = null;
-	private Persist persist = null;
+	private static Config config = null;
+	private static Persist persist = null;
 	private RequestHandler req = null;
+	private StateDriver stateDriver;
+	private volatile static boolean running = false;
 	
 	private Socket socket;
 	
-	public HTTPServer(Socket s, Config c, Persist p) {
-		this.socket = s;
-		this.prov = new ResourceProvider();
-		this.config = c;
-		this.req = new RequestHandler();
-		this.persist = p;
+	public static void initConfig() {
+		try {
+			config = new Config("C:\\Users\\theod\\config.properties");
+		} catch (InvalidPathException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		persist = new Persist(config);
 	}
 	
-	public static void main(String[] args) {
+	public HTTPServer(Socket s, StateDriver sd) {
+		socket = s;
+		this.prov = new ResourceProvider();
+		this.req = new RequestHandler();
+		stateDriver = sd;
+	
+	}
+	
+	public static void startServer(StateDriver sd) {
+		
+		ServerSocket server = null;
 		
 		try {
-			Config config = null;
-			try {
-				config = new Config("C:\\Users\\theod\\config.properties");
-			} catch (InvalidPathException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Persist p = new Persist(config);
-			try {
-				p.setPortNumber(8081);
-			} catch (InvalidPortException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				p.setRootDir("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src");
-			} catch (InvalidDirectoryException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvalidPathException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			int port = p.getPortNumber();
-			ServerSocket server = new ServerSocket(port);
+			int port = persist.getPortNumber();
+			server = new ServerSocket(port);
 			System.out.println("Server started. Listening for connections on  port " + port);
 			
-			while(true) {
-				HTTPServer myServer = new HTTPServer(server.accept(), config, p);
+			while(running) {
+				HTTPServer myServer = new HTTPServer(server.accept(), sd);
 				System.out.println("Connection received.");
 				
 				Thread thread = new Thread(myServer);
@@ -76,6 +67,23 @@ public class HTTPServer implements Runnable{
 		}
 		catch(IOException e){
 			System.err.println("Server connection error: " + e.getMessage());
+		}
+		finally {
+			System.out.println("Thread ending...");
+			if(server != null)
+				try {
+					server.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			/*try {
+				socket.close();
+				System.out.println("I just closed the socket for no reason!!!");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 		}
 		
 	}
@@ -105,32 +113,46 @@ public class HTTPServer implements Runnable{
 				fileRequested = parse.nextToken().toLowerCase();
 			}
 			
-			try {
-				this.req.handleRequest(input);
-				if(fileRequested.endsWith("/"))
-				{
-					fileRequested += DEFAULT_FILE;
+			//System.out.println(HTTPServer.getState().toString());
+			ServerState	s = this.stateDriver.getState();
+			
+			if(s == ServerState.RUNNING)
+			{
+				System.out.println("Running");
+				try {
+					this.req.handleRequest(input);
+					if(fileRequested.endsWith("/"))
+					{
+						fileRequested += DEFAULT_FILE;
+					}
+					
+					String absolutePath = HTTPServer.config.getSetting("rootDirectory") + "\\" +  fileRequested;
+					String pathFileNotFound = HTTPServer.config.getSetting("rootDirectory") + "\\" +  FILE_NOT_FOUND;
+					
+					this.prov.sendRequestedFile(out, dataOut, absolutePath, pathFileNotFound);
+				} catch (InvalidRequestException e) {
+					// TODO Auto-generated catch block
+					File file = new File(HTTPServer.config.getSetting("rootDirectory") + "\\" +  METHOD_NOT_SUPPORTED);
+					int fileLength = (int)file.length();
+					String contentType = "text/html";
+					byte[] fileData = this.prov.readFileData(file, fileLength);
+					
+					out.println("HTTP/1.1 501 Not Implemented");
+					out.println("Content-type: " + contentType);
+					out.println("Content-length: " + fileLength);
+					out.println();
+					out.flush();
+					
+					dataOut.write(fileData, 0, fileLength);
+					dataOut.flush();
 				}
-				
-				String absolutePath = this.config.getSetting("rootDirectory") + "\\" +  fileRequested;
-				String pathFileNotFound = this.config.getSetting("rootDirectory") + "\\" +  FILE_NOT_FOUND;
-				
+			}
+			else if(s == ServerState.MAINTENANCE)
+			{
+				System.out.println("Maintenance");
+				String absolutePath = HTTPServer.config.getSetting("maintenanceDirectory") + "\\maintenance.html";
+				String pathFileNotFound = HTTPServer.config.getSetting("rootDirectory") + "\\" +  FILE_NOT_FOUND;
 				this.prov.sendRequestedFile(out, dataOut, absolutePath, pathFileNotFound);
-			} catch (InvalidRequestException e) {
-				// TODO Auto-generated catch block
-				File file = new File(this.config.getSetting("rootDirectory") + "\\" +  METHOD_NOT_SUPPORTED);
-				int fileLength = (int)file.length();
-				String contentType = "text/html";
-				byte[] fileData = this.prov.readFileData(file, fileLength);
-				
-				out.println("HTTP/1.1 501 Not Implemented");
-				out.println("Content-type: " + contentType);
-				out.println("Content-length: " + fileLength);
-				out.println();
-				out.flush();
-				
-				dataOut.write(fileData, 0, fileLength);
-				dataOut.flush();
 			}
 			
 		}
@@ -150,6 +172,64 @@ public class HTTPServer implements Runnable{
 			}
 		}
 		
+	}
+	
+	/*public static synchronized void changeToMaintenanceMode() {
+		System.out.println("Switch to maintenance");
+		state = ServerState.MAINTENANCE;
+		System.out.println(state);
+	}
+	
+	public static synchronized void changeToRunningState() {
+			state = ServerState.RUNNING;
+	}
+	
+	public static synchronized void changeToStoppedState() {
+			state = ServerState.STOPPED;
+	}
+	
+	public static synchronized ServerState getState() {
+		return state;
+	}*/
+	
+	public static String get(String property)
+	{
+		if(property.equals("port"))
+			return Integer.toString(persist.getPortNumber());
+		else if(property.equals("rootDirectory"))
+			return persist.getRootDir();
+		else if(property.equals("maintenanceDirectory"))
+			return persist.getMaintenanceDir();
+		else
+			return "";
+	}
+	
+	public static void set(String property, String value) throws NumberFormatException, InvalidPortException, InvalidDirectoryException, InvalidPathException 
+	{
+		if(property.equals("port"))
+			
+				persist.setPortNumber(Integer.parseInt(value));
+			
+		else if(property.equals("rootDirectory"))
+			
+				persist.setRootDir(value);
+			
+		else if(property.equals("maintenanceDirectory"))
+			
+				persist.setMaintenanceDir(value);
+			
+	}
+	
+	public static void terminate() {
+		running = false;
+	}
+	
+	public static void start() {
+		running = true;
+	}
+	
+	public static boolean isRunning() {
+		return running;
 	}
 }
 
