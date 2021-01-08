@@ -14,7 +14,7 @@ public class ConfigTest {
 	
 	@Before
 	public void setup() {
-		String configFilePath = "C:\\Users\\theod\\config.properties";
+		String configFilePath = ".\\config.properties";
 		try {
 			config = new Config(configFilePath);
 		} catch (InvalidPathException e) {
@@ -25,14 +25,14 @@ public class ConfigTest {
 
 	@Test(expected = InvalidPathException.class)
 	public void testConfigConstructorInvalidPath() throws InvalidPathException {
-		String configFilePath = "C:\\Users\\<theod\\config.properties";
+		String configFilePath = ".\\<config.properties";
 		config = new Config(configFilePath);
 
 	}
 	
 	@Test(expected = InvalidPathException.class)
 	public void testConfigConstructorInvalidCharsInPath() throws InvalidPathException {
-		String configFilePath = "C:\\Users\\theod*\\config.properties";
+		String configFilePath = ".\\src*\\config.properties";
 		config = new Config(configFilePath);
 
 	}
@@ -45,7 +45,7 @@ public class ConfigTest {
 	
 	@Test
 	public void testConfigConstructorFileDoesNotExist() {
-		String configFilePath = "C:\\Users\\theod\\config.properties";
+		String configFilePath = ".\\src\\root\\config.properties";
 		try {
 			config = new Config(configFilePath);
 		} catch (InvalidPathException e) {
@@ -56,7 +56,7 @@ public class ConfigTest {
 	
 	@Test
 	public void testConfigConstructorValidPath() {
-		String configFilePath = "C:\\Users\\theod\\config.properties";
+		String configFilePath = ".\\config.properties";
 		try {
 			config = new Config(configFilePath);
 		} catch (InvalidPathException e) {
@@ -73,7 +73,7 @@ public class ConfigTest {
 	
 	@Test(expected = InvalidPathException.class)
 	public void testSaveConfigFileInvalidCharsInPath() throws InvalidPathException {
-		String newConfigFilePath = "C:\\Users\\theod?\\config.properties";
+		String newConfigFilePath = ".\\src?\\config.properties";
 		config.saveConfigFile(newConfigFilePath);;
 	}
 	
@@ -85,7 +85,7 @@ public class ConfigTest {
 	
 	@Test
 	public void testSaveConfigFileFileDoesNotExist() {
-		String newConfigFilePath = "C:\\Users\\theod\\config.properties";
+		String newConfigFilePath = ".\\src\\maintenance\\config.properties";
 		try {
 			config.saveConfigFile(newConfigFilePath);;
 		} catch (InvalidPathException e) {
@@ -96,7 +96,7 @@ public class ConfigTest {
 	
 	@Test
 	public void testSaveConfigFileValidPath() {
-		String newConfigFilePath = "C:\\Users\\theod\\config.properties";
+		String newConfigFilePath = ".\\config.properties";
 		try {
 			config.saveConfigFile(newConfigFilePath);;
 		} catch (InvalidPathException e) {

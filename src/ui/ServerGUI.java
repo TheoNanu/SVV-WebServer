@@ -44,13 +44,13 @@ public class ServerGUI implements Runnable{
 	
 	public void readImages() {
 		try {
-			passPic = ImageIO.read(new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\check.png"));
+			passPic = ImageIO.read(new File(".\\src\\check.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			failPic = ImageIO.read(new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\remove.png"));
+			failPic = ImageIO.read(new File(".\\src\\remove.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -32,7 +32,7 @@ public class HTTPServer implements Runnable{
 	
 	public static void initConfig() {
 		try {
-			config = new Config("C:\\Users\\theod\\config.properties");
+			config = new Config(".\\config.properties");
 		} catch (InvalidPathException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -28,7 +28,7 @@ public class ResourceProviderTest {
 	public void setup() {
 		this.prov = new ResourceProvider();
 		try {
-			this.config = new Config("C:\\Users\\theod\\config.properties");
+			this.config = new Config(".\\config.properties");
 		} catch (InvalidPathException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -44,7 +44,7 @@ public class ResourceProviderTest {
 	
 	@Test
 	public void testContentReadFromFile() {
-		File file = new File("C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt");
+		File file = new File(".\\src\\test.txt");
 		int fileLength = (int)file.length();
 		byte expected[] = "This is a test file.".getBytes();
 		try {
@@ -124,7 +124,7 @@ public class ResourceProviderTest {
 	
 	@Test
 	public void testContentOfRequestedFile() {
-		String reqFile = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt";
+		String reqFile = ".\\src\\test.txt";
 		String fileNotFound = config.getSetting("rootDirectory") + "\\404.html";
 		File file = new File(reqFile);
 		int fileLength = (int)file.length();
@@ -156,7 +156,7 @@ public class ResourceProviderTest {
 		OutputStream otp2 = new ByteArrayOutputStream();
 		OutputStream dataOut = new BufferedOutputStream(otp1);
 		PrintWriter out = new PrintWriter(otp2);
-		prov.sendRequestedFile(out, dataOut, "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\test.txt", fileNotFound);
+		prov.sendRequestedFile(out, dataOut, ".\\src\\test.txt", fileNotFound);
 		String dataAsString = new String(fileContent);
 		assertTrue(dataAsString.equals(otp1.toString()));
 	}

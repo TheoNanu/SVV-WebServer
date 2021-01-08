@@ -19,7 +19,7 @@ public class PersistTest {
 	@Before
 	public void setup() {
 		try {
-			this.config = new Config("C:\\Users\\theod\\config.properties");
+			this.config = new Config(".\\config.properties");
 		} catch (InvalidPathException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,20 +52,20 @@ public class PersistTest {
 	
 	@Test(expected = InvalidPathException.class)
 	public void testSetRootDirInvalidPath() throws InvalidDirectoryException, InvalidPathException {
-		String rootDirPath = "C:\\Users\\theod*";
+		String rootDirPath = "C:\\Users*";
 		persist.setRootDir(rootDirPath);
 	}
 	
 	@Test(expected = InvalidDirectoryException.class)
 	public void testSetRootDirInvalidDirectoryException() throws InvalidDirectoryException, InvalidPathException {
-		String rootDirPath = "C:\\Users\\theod\\Documents";
+		String rootDirPath = "C:\\Users";
 		persist.setRootDir(rootDirPath);
 	
 	}
 	
 	@Test
 	public void testSetRootDirValidPathAndDir() {
-		String rootDirPath = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\root";
+		String rootDirPath = ".\\src\\root";
 		try {
 			persist.setRootDir(rootDirPath);
 		} catch (InvalidDirectoryException e) {
@@ -80,20 +80,20 @@ public class PersistTest {
 	
 	@Test(expected = InvalidPathException.class)
 	public void testSetMaintenanceDirInvalidPath() throws InvalidDirectoryException, InvalidPathException {
-		String maintenanceDirPath = "C:\\Users\\theod*";
+		String maintenanceDirPath = "C:\\Users*";
 		persist.setMaintenanceDir(maintenanceDirPath);
 	}
 	
 	@Test(expected = InvalidDirectoryException.class)
 	public void testSetMaintenanceDirInvalidDirectoryException() throws InvalidDirectoryException, InvalidPathException {
-		String maintenanceDirPath = "C:\\Users\\theod\\Documents";
+		String maintenanceDirPath = "C:\\Users";
 		persist.setMaintenanceDir(maintenanceDirPath);
 
 	}
 	
 	@Test
 	public void testSetMaintenanceDirValidPathAndDir() {
-		String maintenanceDirPath = "C:\\Users\\theod\\eclipse-workspace\\WebServer\\src\\maintenance";
+		String maintenanceDirPath = ".\\src\\maintenance";
 		try {
 			persist.setMaintenanceDir(maintenanceDirPath);
 		} catch (InvalidDirectoryException e) {
